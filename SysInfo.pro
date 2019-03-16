@@ -28,15 +28,18 @@ SOURCES += \
         main.cpp \
         MainWindow.cpp \
     SysInfo.cpp \
-    SysInfoWindowsImpl.cpp
 
 HEADERS += \
         MainWindow.hpp \
     SysInfo.hpp \
-    SysInfoWindowsImpl.hpp
 
 FORMS += \
         MainWindow.ui
+
+windows {
+    SOURCES += SysInfoWindowsImpl.cpp
+    HEADERS += SysInfoWindowsImpl.hpp
+}
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

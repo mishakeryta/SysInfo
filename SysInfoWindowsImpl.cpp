@@ -3,13 +3,16 @@
 #include <windows.h>
 
 SysInfoWindowsImpl::SysInfoWindowsImpl():
-    SysInfo()
+    SysInfo(),
+    m_prevCpuLoadAverage(0),
+    m_prevIdleTicks(0),
+    m_prevTotalTicks(0)
 {
 }
 
 void SysInfoWindowsImpl::init()
 {
-    //TODO
+    cpuLoadAverage();
 }
 
 double SysInfoWindowsImpl::memoryUsed()
@@ -27,23 +30,33 @@ double SysInfoWindowsImpl::cpuLoadAverage()
 {
     FILETIME idleTime, kernelTime, userTime;
     if(GetSystemTimes(&idleTime, &kernelTime, &userTime)) {
-         //double cpuLoad = calculateCPULoadAverage(fileTimeToUInt64(idleTime), fileTimeToUInt64(kernelTime)+fileTimeToUInt64(userTime));
-         //m_prevCpuLoadAvarage = cpuLoad;
-        // return  cpuLoad;
+         double cpuLoad = calculateCpuLoadAverage(fileTimeToUInt64(idleTime),
+                                                  fileTimeToUInt64(kernelTime) + fileTimeToUInt64(userTime));
+         m_prevCpuLoadAverage = cpuLoad;
+         return  cpuLoad;
     }
     //TODO: add logs about fail
     return  m_prevCpuLoadAverage;
 }
 
-double SysInfoWindowsImpl::cpuLoadAvarege(uint64_t idleTicks, uint64_t totalTicks)
+double SysInfoWindowsImpl::calculateCpuLoadAverage(uint64_t idleTicks, uint64_t totalTicks)
 {
-    //TODO
-    return 0;
+    int64_t idleTicksSinceLastTime = static_cast<int64_t>(idleTicks) - static_cast<int64_t>(m_prevIdleTicks);
+    int64_t totalTicksSinceLastTime = static_cast<int64_t>(totalTicks) - static_cast<int64_t>(m_prevTotalTicks);
+    double cpuLoad = 0;
+    if(totalTicksSinceLastTime > 0) {
+        cpuLoad = 1 - static_cast<double>(idleTicksSinceLastTime) / totalTicksSinceLastTime;
+    }
+    else {
+        cpuLoad = 1;
+    }
+    return  cpuLoad;
 }
+
 
 uint64_t SysInfoWindowsImpl::fileTimeToUInt64(const FILETIME &fileTime) const
 {
-    //TODO
-    return 0;
+    return (static_cast<uint64_t>(fileTime.dwHighDateTime) << 32) |
+            static_cast<uint64_t>(fileTime.dwLowDateTime);
 }
 

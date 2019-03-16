@@ -4,13 +4,21 @@
 
 class SysInfo
 {
+
 public:
-    virtual ~SysInfo() = default;
+    static SysInfo& instance();
+
+    SysInfo(const SysInfo& info) = delete;
+    SysInfo& operator=(const SysInfo& info) = delete;
+
     virtual void init() = 0;
     virtual double memoryUsed() = 0;
     virtual double cpuLoadAverage() = 0;
+
+    virtual ~SysInfo() = default;
 protected:
-    SysInfo();
+    explicit SysInfo();
+
 };
 
 #endif // SYSINFO_HPP
